@@ -3,6 +3,17 @@ const list = document.querySelector('#reviews');
 const statusBox = document.querySelector('#status');
 const fakeReviews = window.SITE_CONFIG.reviews;
 
+async function loadSiteSettings() {
+  try {
+    const response = await fetch(`${window.SITE_CONFIG.api}/api/sites/${window.SITE_CONFIG.slug}`);
+    if (!response.ok) return;
+    const site = await response.json();
+    document.querySelector('.program-link').href = site.program_url;
+  } catch (_) {
+    // Keep the build-time fallback link if settings are temporarily unavailable.
+  }
+}
+
 function stars(value) {
   return `<span class="stars" aria-label="${value} из 5">${'★'.repeat(value)}${'☆'.repeat(5 - value)}</span>`;
 }
@@ -53,4 +64,5 @@ form.addEventListener('submit', async (event) => {
   }
 });
 
+loadSiteSettings();
 loadReviews();
