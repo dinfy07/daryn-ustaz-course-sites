@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: daryn-ustaz-reviews
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: ALLOWED_ORIGINS
+        value: "*"

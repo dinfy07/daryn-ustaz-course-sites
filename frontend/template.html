@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="{{LANG}}">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="{{TITLE}}"><title>Daryn Ustaz — {{SHORT_TITLE}}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css">
+</head>
+<body><main class="shell">
+  <section class="hero"><img class="logo" src="logo.png" alt="Daryn Ustaz">
+    <div class="eyebrow">{{EYEBROW}}</div><h1>«{{TITLE}}»</h1><p class="subtitle">{{SUBTITLE}}</p>
+    <a class="program-link" href="https://docs.google.com/document/d/1IQ5fs2VojgV_s4Hg4tr0TO8_S1J8-i-k/edit?usp=sharing" target="_blank" rel="noopener">{{PROGRAM}}</a>
+    <div class="contact">{{CONTACT}} <a href="mailto:daryn.teacher@gmail.com">daryn.teacher@gmail.com</a></div>
+  </section>
+  <section class="feedback"><h2>{{FORM_TITLE}}</h2><p class="section-note">{{FORM_NOTE}}</p>
+    <form id="review-form"><div class="form-grid"><label>{{NAME}}<input name="name" required minlength="2" maxlength="100"></label><label>{{RATING}}<select name="stars"><option value="5">5 ★</option><option value="4">4 ★</option><option value="3">3 ★</option><option value="2">2 ★</option><option value="1">1 ★</option></select></label><label class="full">{{COMMENT}}<textarea name="comment" required minlength="3" maxlength="1500"></textarea></label></div><div class="form-actions"><button class="submit" type="submit">{{SEND}}</button><span id="status" role="status"></span></div></form>
+  </section>
+  <section class="reviews-section"><h2>{{REVIEWS_TITLE}}</h2><div id="reviews"></div></section>
+</main><script src="config.js"></script><script src="app.js"></script></body></html>
