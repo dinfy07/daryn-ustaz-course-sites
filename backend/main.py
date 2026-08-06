@@ -126,7 +126,8 @@ def startup() -> None:
     with Session(engine) as session:
         rng = random.Random(20260806)
         start = datetime(2026, 7, 1, tzinfo=timezone.utc)
-        span_seconds = 62 * 24 * 60 * 60 - 1
+        # Keep dates inside July-August even after Kazakhstan's UTC+5 conversion.
+        span_seconds = (61 * 24 + 18) * 60 * 60 - 1
         for slug, data in NEW_COURSES.items():
             if session.get(Site, slug):
                 continue
@@ -159,6 +160,15 @@ def startup() -> None:
                     WHERE created_at < TIMESTAMPTZ '2026-08-06 00:00:00+00'
                 """))
                 connection.execute(text("INSERT INTO app_settings (key, value) VALUES ('review_dates_july_august_2026', 'done')"))
+            preschool_dates_fixed = connection.execute(text("SELECT 1 FROM app_settings WHERE key = 'preschool_review_dates_local_2026'")).first()
+            if not preschool_dates_fixed:
+                connection.execute(text("""
+                    UPDATE reviews
+                    SET created_at = created_at - INTERVAL '1 day'
+                    WHERE site_slug IN ('course-7', 'course-8')
+                      AND created_at >= TIMESTAMPTZ '2026-08-31 19:00:00+00'
+                """))
+                connection.execute(text("INSERT INTO app_settings (key, value) VALUES ('preschool_review_dates_local_2026', 'done')"))
 
 
 @app.get("/health")
