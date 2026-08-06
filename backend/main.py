@@ -1,6 +1,7 @@
 import os
+import random
 import secrets
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -66,7 +67,40 @@ class ProgramUrlUpdate(BaseModel):
     program_url: str = Field(min_length=8, max_length=2000, pattern=r"^https://")
 
 
-VALID_COURSES = {f"course-{i}" for i in range(1, 7)}
+NEW_COURSES = {
+    "course-7": {
+        "title": "Мектепке дейінгі жастағы балалардың білім беру қызметін ұйымдастыруда тәрбиешінің кәсіби құзыреттерін дамыту",
+        "subtitle": "Педагогтердің біліктілігін арттыру курстарының білім беру бағдарламасы",
+        "reviews": [
+            ("Айдана Серікқызы", "Курс мектепке дейінгі білім беру жұмысын жаңаша ұйымдастыруға қажетті пайдалы тәсілдерді көрсетті.", 5),
+            ("Гүлнар Талғатқызы", "Тәрбиешінің кәсіби құзыреттерін дамытуға арналған практикалық ұсыныстар өте құнды болды.", 5),
+            ("Мадина Ерланқызы", "Балалардың жас ерекшеліктерін ескеріп қызметті жоспарлау бойынша жаңа идеялар алдым.", 5),
+            ("Салтанат Нұрланқызы", "Материал түсінікті және жүйелі берілген. Көптеген әдістерді тобымда қолданамын.", 4),
+            ("Әсел Болатқызы", "Курс кәсіби тәжірибемді талдап, білім беру ортасын жақсартуға көмектесті.", 5),
+            ("Жанар Қайратқызы", "Практикалық мысалдар мен тапсырмалар тәрбиешілер үшін өте пайдалы.", 5),
+            ("Ләззат Мұратқызы", "Бағдарлама мазмұны өзекті. Кейбір тақырыптарға көбірек уақыт бөлінсе жақсы болар еді.", 4),
+            ("Кәмшат Әлиқызы", "Балалармен білім беру қызметін ұйымдастырудың тиімді жолдарын меңгердім.", 5),
+            ("Нұргүл Асқарқызы", "Курс маған кәсіби сенімділік беріп, күнделікті жұмысқа жаңа серпін қосты.", 5),
+            ("Динара Бекқызы", "Әдістемелік материалдар сапалы, мазмұны мектепке дейінгі ұйым тәжірибесіне сай.", 5),
+        ],
+    },
+    "course-8": {
+        "title": "Развитие профессиональных компетенций воспитателя в организации образовательной деятельности детей дошкольного возраста",
+        "subtitle": "Образовательная программа курса повышения квалификации педагогов",
+        "reviews": [
+            ("Елена Андреевна", "Курс дал современные инструменты для организации образовательной деятельности дошкольников.", 5),
+            ("Марина Сергеевна", "Практические рекомендации легко адаптировать к ежедневной работе воспитателя.", 5),
+            ("Ольга Викторовна", "Особенно полезными были материалы по планированию занятий с учётом возраста детей.", 5),
+            ("Наталья Игоревна", "Программа хорошо структурирована, хотелось бы ещё больше времени на разбор кейсов.", 4),
+            ("Ирина Павловна", "Полученные знания помогут сделать образовательную среду группы более развивающей.", 5),
+            ("Светлана Олеговна", "Материал актуальный, понятный и ориентированный на реальную практику воспитателя.", 5),
+            ("Анна Михайловна", "Курс помог систематизировать опыт и освоить новые методы взаимодействия с детьми.", 5),
+            ("Татьяна Романовна", "Полезная программа, некоторые методики уже начала применять в своей группе.", 4),
+            ("Людмила Борисовна", "Понравилось сочетание теории и практических заданий. Спасибо за качественные материалы.", 5),
+            ("Виктория Алексеевна", "Курс способствует профессиональному росту и даёт много идей для работы с дошкольниками.", 5),
+        ],
+    },
+}
 
 
 def require_admin(authorization: str | None = Header(default=None)) -> None:
@@ -89,6 +123,30 @@ app.add_middleware(
 @app.on_event("startup")
 def startup() -> None:
     Base.metadata.create_all(engine)
+    with Session(engine) as session:
+        rng = random.Random(20260806)
+        start = datetime(2026, 7, 1, tzinfo=timezone.utc)
+        span_seconds = 62 * 24 * 60 * 60 - 1
+        for slug, data in NEW_COURSES.items():
+            if session.get(Site, slug):
+                continue
+            session.add(Site(
+                slug=slug,
+                title=data["title"],
+                subtitle=data["subtitle"],
+                program_url="https://docs.google.com/document/d/1IQ5fs2VojgV_s4Hg4tr0TO8_S1J8-i-k/edit?usp=sharing",
+                email="daryn.teacher@gmail.com",
+            ))
+            session.flush()
+            for name, comment, stars in data["reviews"]:
+                session.add(Review(
+                    course_slug=slug,
+                    name=name,
+                    comment=comment,
+                    stars=stars,
+                    created_at=start + timedelta(seconds=rng.randint(0, span_seconds)),
+                ))
+        session.commit()
     if engine.dialect.name == "postgresql":
         with engine.begin() as connection:
             connection.execute(text("CREATE TABLE IF NOT EXISTS app_settings (key VARCHAR(100) PRIMARY KEY, value TEXT NOT NULL)"))
@@ -138,18 +196,18 @@ def update_program_url(course_slug: str, payload: ProgramUrlUpdate) -> Site:
 
 @app.get("/api/reviews/{course_slug}", response_model=list[ReviewOut])
 def get_reviews(course_slug: str) -> list[Review]:
-    if course_slug not in VALID_COURSES:
-        raise HTTPException(404, "Course not found")
     with Session(engine) as session:
+        if not session.get(Site, course_slug):
+            raise HTTPException(404, "Course not found")
         return list(session.scalars(select(Review).where(Review.course_slug == course_slug).order_by(Review.created_at.desc())).all())
 
 
 @app.post("/api/reviews/{course_slug}", response_model=ReviewOut, status_code=201)
 def create_review(course_slug: str, payload: ReviewCreate) -> Review:
-    if course_slug not in VALID_COURSES:
-        raise HTTPException(404, "Course not found")
-    review = Review(course_slug=course_slug, name=payload.name.strip(), comment=payload.comment.strip(), stars=payload.stars)
     with Session(engine) as session:
+        if not session.get(Site, course_slug):
+            raise HTTPException(404, "Course not found")
+        review = Review(course_slug=course_slug, name=payload.name.strip(), comment=payload.comment.strip(), stars=payload.stars)
         session.add(review)
         session.commit()
         session.refresh(review)
