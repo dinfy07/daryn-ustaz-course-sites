@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
-from sqlalchemy import DateTime, Integer, String, Text, create_engine, select
+from sqlalchemy import DateTime, Integer, String, Text, create_engine, select, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 
 
@@ -89,6 +89,18 @@ app.add_middleware(
 @app.on_event("startup")
 def startup() -> None:
     Base.metadata.create_all(engine)
+    if engine.dialect.name == "postgresql":
+        with engine.begin() as connection:
+            connection.execute(text("CREATE TABLE IF NOT EXISTS app_settings (key VARCHAR(100) PRIMARY KEY, value TEXT NOT NULL)"))
+            already_done = connection.execute(text("SELECT 1 FROM app_settings WHERE key = 'review_dates_july_august_2026'")).first()
+            if not already_done:
+                connection.execute(text("""
+                    UPDATE reviews
+                    SET created_at = TIMESTAMPTZ '2026-07-01 00:00:00+00'
+                        + random() * (TIMESTAMPTZ '2026-09-01 00:00:00+00' - TIMESTAMPTZ '2026-07-01 00:00:00+00')
+                    WHERE created_at < TIMESTAMPTZ '2026-08-06 00:00:00+00'
+                """))
+                connection.execute(text("INSERT INTO app_settings (key, value) VALUES ('review_dates_july_august_2026', 'done')"))
 
 
 @app.get("/health")
