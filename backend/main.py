@@ -23,10 +23,10 @@ class Review(Base):
     __tablename__ = "reviews"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    course_slug: Mapped[str] = mapped_column(String(80), index=True)
+    course_slug: Mapped[str] = mapped_column("site_slug", String(30), index=True)
     name: Mapped[str] = mapped_column(String(100))
-    comment: Mapped[str] = mapped_column(Text)
-    stars: Mapped[int] = mapped_column(Integer)
+    comment: Mapped[str] = mapped_column("message", Text)
+    stars: Mapped[int] = mapped_column("rating", Integer)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
 
