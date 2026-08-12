@@ -208,6 +208,11 @@ app.add_middleware(
 def startup() -> None:
     Base.metadata.create_all(engine)
     with Session(engine) as session:
+        # Remove the one production smoke-test review after verifying the public POST flow.
+        session.query(Review).filter(
+            Review.name == "Проверка формы",
+            Review.comment == "Тест отправки нового отзыва через публичный API",
+        ).delete(synchronize_session=False)
         rng = random.Random(20260806)
         start = datetime(2026, 7, 1, tzinfo=timezone.utc)
         # Keep every displayed date inside July in Kazakhstan's UTC+5 timezone.
