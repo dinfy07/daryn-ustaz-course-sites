@@ -276,7 +276,8 @@ def get_site(course_slug: str) -> Site:
 @app.get("/api/admin/sites", response_model=list[SiteOut], dependencies=[Depends(require_admin)])
 def admin_sites() -> list[Site]:
     with Session(engine) as session:
-        return list(session.scalars(select(Site).order_by(Site.slug)).all())
+        sites = list(session.scalars(select(Site)).all())
+        return sorted(sites, key=lambda site: int(site.slug.removeprefix("course-")))
 
 
 @app.patch("/api/admin/sites/{course_slug}", response_model=SiteOut, dependencies=[Depends(require_admin)])

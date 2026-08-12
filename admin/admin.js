@@ -3,6 +3,7 @@ const login = document.querySelector('#login');
 const editor = document.querySelector('#editor');
 const logout = document.querySelector('#logout');
 const courses = document.querySelector('#courses');
+const coursesTitle = document.querySelector('#courses-title');
 const loginStatus = document.querySelector('#login-status');
 const editorStatus = document.querySelector('#editor-status');
 let password = sessionStorage.getItem('daryn_admin_password') || '';
@@ -26,6 +27,8 @@ async function loadCourses() {
   editorStatus.textContent = 'Загрузка...';
   try {
     const sites = await request('/api/admin/sites');
+    sites.sort((a, b) => Number(a.slug.replace('course-', '')) - Number(b.slug.replace('course-', '')));
+    coursesTitle.textContent = `Все сайты — ${sites.length}`;
     courses.innerHTML = sites.map(courseCard).join('');
     login.hidden = true; editor.hidden = false; logout.hidden = false; editorStatus.textContent = '';
   } catch (error) {

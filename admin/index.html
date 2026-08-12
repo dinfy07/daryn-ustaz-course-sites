@@ -9,5 +9,5 @@
 <body><main class="admin-shell">
   <header><img src="logo.png" alt="Daryn Ustaz"><div><p>Единая админка</p><h1>Ссылки на программы курсов</h1></div><button id="logout" class="quiet" hidden>Выйти</button></header>
   <section id="login" class="panel"><h2>Вход</h2><p>Введите пароль администратора.</p><form id="login-form"><label>Пароль<input type="password" name="password" autocomplete="current-password" required></label><button type="submit">Войти</button><span id="login-status" role="status"></span></form></section>
-  <section id="editor" class="panel" hidden><div class="section-head"><div><h2>Шесть сайтов</h2><p>Измените нужную ссылку и нажмите «Сохранить».</p></div><button id="refresh" class="quiet">Обновить</button></div><div id="courses"></div><p id="editor-status" role="status"></p></section>
+  <section id="editor" class="panel" hidden><div class="section-head"><div><h2 id="courses-title">Все сайты</h2><p>Здесь доступны все курсы. Измените нужную ссылку и нажмите «Сохранить».</p></div><button id="refresh" class="quiet">Обновить</button></div><div id="courses"></div><p id="editor-status" role="status"></p></section>
 </main><script>window.ADMIN_API='https://daryn-ustaz-reviews.onrender.com';</script><script src="admin.js"></script></body></html>
