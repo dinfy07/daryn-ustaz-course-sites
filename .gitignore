@@ -1,4 +1,5 @@
 backend/__pycache__/
+__pycache__/
 backend/*.db
 dist/
 .env
